@@ -1,7 +1,7 @@
 ## phpbips
 
 
-This repository is a readonly mirror of [digitaloversight/phpbips](https://sslcube.com/digitaloversight/phpbip/)
+This repository is a readonly mirror of [digitaloversight/phpbips](https://sslcube.com/digitaloversight/phpbips/)
 
 
 ### Introduction
