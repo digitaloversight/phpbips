@@ -65,15 +65,15 @@ class Bip0032 extends EccBase implements BipInterface
 
     public function fromEntropy(string $entropy = ''): void
     {
-        if (!$entropy) {
+        if (!empty($entropy)) {
             if (!extension_loaded('openssl')) {
-                $entropy = random_bytes(MIN_ENTROPY_LEN/8);
+                $entropy = random_bytes(self::MIN_ENTROPY_LEN/8);
             } else {
-                $entropy = openssl_random_pseudo_bytes(MIN_ENTROPY_LEN/8);
+                $entropy = openssl_random_pseudo_bytes(self::MIN_ENTROPY_LEN/8);
             }
         }
 
-        if (strlen($entropy) < MIN_ENTROPY_LEN/8) {
+        if (strlen($entropy) < self::MIN_ENTROPY_LEN/8) {
             throw new \RuntimeException("Provided entropy is too small");
         }
 
@@ -85,19 +85,22 @@ class Bip0032 extends EccBase implements BipInterface
     /**
      * Create a BIP32Key by importing from extended private or public key string.
      * If public is True, return a public-only key regardless of input type.
+     *
+     * @param string $xkey
+     * @param bool $public
      */
 
-    public function fromExtendedKey(string $xkey, $public = false): void
+    public function fromExtendedKey(string $xkey, bool $public = false): void
     {
         $raw = Base58::decode($xkey);
-        if (strlen($raw) != 78) {
+        if (strlen($raw) != 82) {
             throw new \RuntimeException("Provided extended key has the wrong length");
         }
 
-        $version = substr($xkey, 0, 4);
-        if ($version == parent::getExPrivate()) {
+        $version = substr($raw, 0, 4);
+        if ($version == hex2bin(parent::getExPrivate())) {
             $this->setKeyType(false);
-        } elseif ($version == parent::getExPublic()) {
+        } elseif ($version == hex2bin(parent::getExPublic())) {
             $this->setKeyType(true);
         } else {
             throw new \RuntimeException("Unkown extended key version");
@@ -105,12 +108,12 @@ class Bip0032 extends EccBase implements BipInterface
 
         $this->setDepth(ord($raw[4]));
         $this->setFpr(substr($raw, 5, 9));
-        $this->setIndex(unpack("N", substr($raw, 9, 13)[0]));
-        $this->setChain(substr($raw, 13, 45));
+        $this->setIndex( unpack("N", substr($raw, 9, 13))[1] );
+        $this->setChain(substr($raw, 13, 32));
         $secret = substr($raw, 45, 78);
 
         if ($this->getKeyType() == false) {
-            $this->setSecret(substr($secret, 1, strlen($secret)));
+            $this->secret = substr($secret, 1, strlen($secret));
         } else {
             $lsb = ord($secret[0]) & 1;
 
