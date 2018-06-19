@@ -1,5 +1,7 @@
 ## phpbips
 
+[![Build Status](https://travis-ci.org/digitaloversight/phpbips.png)](https://travis-ci.org/digitaloversight/phpbips)
+
 
 This repository is a readonly mirror of [digitaloversight/phpbips](https://sslcube.com/digitaloversight/phpbips/)
 
